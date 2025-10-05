@@ -1,0 +1,10 @@
+#!/bin/sh
+
+export DESIGN=A7LITE_TEST
+
+# Download Bit File
+#openFPGALoader -c ft232 -b arty_a7_35t ../rpt/${DESIGN}.bit 
+
+# Download to Flash
+openFPGALoader -c ft232 -b arty_a7_35t -f ../rpt/${DESIGN}.bit 
+

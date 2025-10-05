@@ -1,0 +1,103 @@
+# ------------------------------------------------------------------------------
+# Vivado Non-Project Flow
+# ------------------------------------------------------------------------------
+set DESIGN      [lindex $argv 0]
+set PRJ_PATH    [lindex $argv 1]
+
+# ------------------------------------------------------------------------------
+config_webtalk -user off
+
+# ------------------------------------------------------------------------------
+create_project -in_memory -part xc7a35tfgg484-2
+
+# ------------------------------------------------------------------------------
+proc read_filelist {filelist} {
+    global hdl_list
+    global incdir_list
+    set fp [open $filelist r]
+    while {[gets $fp fname] != -1} {
+        if {[regexp {^//} $fname]} {
+            continue
+        } elseif {[regexp {^\S+\.v} $fname]} {
+            regsub {\$PRJ_PATH} $fname $::PRJ_PATH fname_sub
+            lappend hdl_list $fname_sub
+        } elseif {[regexp {^\S+\.sv} $fname]} {
+            regsub {\$PRJ_PATH} $fname $::PRJ_PATH fname_sub
+            lappend hdl_list $fname_sub
+        } elseif {[regexp {^-v} $fname]} {
+            regsub {-v\s+\$PRJ_PATH} $fname $::PRJ_PATH fname_sub
+            lappend hdl_list $fname_sub
+        } elseif {[regexp {^\+incdir\+} $fname]} {
+            regsub {^\+incdir\+} $fname "" fname_sub
+            lappend incdir_list $fname_sub
+        }
+    }
+    close $fp
+}
+
+# ------------------------------------------------------------------------------
+set hdl_list ""
+set incdir_list ""
+read_filelist "$PRJ_PATH/rtl/filelist.f"
+
+# ------------------------------------------------------------------------------
+set_property verilog_define "SYNTHESIS" [current_fileset]
+set_property include_dirs $incdir_list [current_fileset]
+set_property top ${DESIGN} [current_fileset]
+
+read_verilog -sv $hdl_list
+read_ip "../../ip/MIG_DDR3/MIG_DDR3.xci"
+read_ip "../../ip/TMDSClkGen/TMDSClkGen.xci"
+read_ip "../../ip/blkram8192x24/blkram8192x24.xci"
+read_ip "../../ip/AxiGPIO/AxiGPIO.xci"
+read_ip "../../ip/AxiUartLite/AxiUartLite.xci"
+read_xdc "../scr/${DESIGN}.xdc"
+
+# ------------------------------------------------------------------------------
+synth_design -top ${DESIGN} -part xc7a35tfgg484-2
+write_checkpoint -force ../rpt/${DESIGN}_synth.dcp
+report_utilization -file ../rpt/${DESIGN}_synth_utilization.rpt
+report_timing_summary -file ../rpt/${DESIGN}_synth_timing_summary.rpt
+
+# ------------------------------------------------------------------------------
+if {[llength [get_debug_cores -quiet]] > 0} {
+    implement_debug_core
+}
+
+write_debug_probes -force ../rpt/${DESIGN}.ltx
+
+# ------------------------------------------------------------------------------
+opt_design -directive Explore
+place_design -directive Explore
+phys_opt_design -directive Explore
+write_checkpoint -force ../rpt/${DESIGN}_placed.dcp
+report_utilization -file ../rpt/${DESIGN}_placed_utilization.rpt
+report_timing_summary -file ../rpt/${DESIGN}_placed_timing_summary.rpt
+
+# ------------------------------------------------------------------------------
+route_design -directive Explore -tns_cleanup
+phys_opt_design -directive Explore
+write_checkpoint -force ../rpt/${DESIGN}_routed.dcp
+report_route_status -file ../rpt/${DESIGN}_routed_status.rpt
+report_timing_summary -file ../rpt/${DESIGN}_routed_timing_summary.rpt
+
+# ------------------------------------------------------------------------------
+#set_property CONFIG_MODE SPIx4 [current_design]
+#set_property BITSTREAM.CONFIG.SPI_BUSWIDTH 4 [current_design]
+#set_property BITSTREAM.CONFIG.CONFIGRATE 50 [current_design]
+#set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
+write_bitstream -force -file ../rpt/${DESIGN}.bit
+write_cfgmem -force -format bin -interface SPIx1 -size 16 -loadbit "up 0 ../rpt/${DESIGN}.bit" -file ../rpt/${DESIGN}.bin
+write_cfgmem -force -format mcs -interface SPIx1 -size 16 -loadbit "up 0 ../rpt/${DESIGN}.bit" -file ../rpt/${DESIGN}.mcs
+
+# ------------------------------------------------------------------------------
+open_hw
+connect_hw_server -url localhost:3121
+open_hw_target [lindex [get_hw_targets] 0]
+current_hw_device [lindex [get_hw_devices] 0]
+refresh_hw_device -update_hw_probes false [lindex [get_hw_devices] 0]
+set_property PROBES.FILE "../rpt/${DESIGN}.ltx" [lindex [get_hw_devices] 0]
+set_property PROGRAM.FILE "../rpt/${DESIGN}.bit" [lindex [get_hw_devices] 0]
+program_hw_devices [lindex [get_hw_devices] 0]
+refresh_hw_device [lindex [get_hw_devices] 0]
+

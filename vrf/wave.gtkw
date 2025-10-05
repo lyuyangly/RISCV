@@ -1,0 +1,74 @@
+[*]
+[*] GTKWave Analyzer v3.3.118 (w)1999-2023 BSI
+[*] Sat Oct  4 00:19:50 2025
+[*]
+[dumpfile] "./logs/wave.vcd"
+[dumpfile_mtime] "Sat Oct  4 00:01:36 2025"
+[dumpfile_size] 2081182
+[savefile] "./wave.gtkw"
+[timestart] 61200
+[size] 1920 1001
+[pos] -27 -24
+*-15.707755 100000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[sst_width] 304
+[signals_width] 363
+[sst_expanded] 1
+[sst_vpaned_height] 295
+@3
+top.top.clk
+@2
+top.top.rst_n
+top.top.intr_i
+@800200
+-axi_read_addr
+@2
+top.top.cpu_arlen[3:0]
+top.top.cpu_arsize[2:0]
+top.top.cpu_arburst[1:0]
+top.top.cpu_araddr[31:0]
+top.top.cpu_arready
+top.top.cpu_arvalid
+@1000200
+-axi_read_addr
+@800200
+-axi_read_data
+@2
+top.top.cpu_rready
+top.top.cpu_rvalid
+top.top.cpu_rlast
+top.top.cpu_rdata[31:0]
+top.top.cpu_rresp[1:0]
+@1000200
+-axi_read_data
+@800200
+-axi_write_addr
+@2
+top.top.cpu_awlen[3:0]
+top.top.cpu_awsize[2:0]
+top.top.cpu_awburst[1:0]
+top.top.cpu_awaddr[31:0]
+top.top.cpu_awready
+top.top.cpu_awvalid
+@1000200
+-axi_write_addr
+@800200
+-axi_write_data
+@2
+top.top.cpu_wlast
+top.top.cpu_wready
+top.top.cpu_wvalid
+top.top.cpu_wstrb[3:0]
+top.top.cpu_wdata[31:0]
+@1000200
+-axi_write_data
+@800200
+-axi_write_response
+@2
+top.top.cpu_bready
+top.top.cpu_bvalid
+top.top.cpu_bresp[1:0]
+@1000200
+-axi_write_response
+[pattern_trace] 1
+[pattern_trace] 0

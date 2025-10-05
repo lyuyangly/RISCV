@@ -1,0 +1,5 @@
+#!/bin/sh
+source /opt/Xilinx/Vivado/2017.4/settings64.sh
+rm -rf *.log
+vivado -nojournal -mode batch -source ../scr/syn_common.tcl -tclargs A7LITE_TEST ../..
+rm -rf .cache .Xil fsm_encoding.os
