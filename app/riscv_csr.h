@@ -32,7 +32,7 @@
 
 #define __RISCV_STR(str) #str
 
-#define iowr(addr, data) *((volatile uint32_t *)(addr)) = (data)
+#define iowr(addr, data) (*((volatile uint32_t *)(addr)) = (data))
 #define iord(addr) (*((volatile uint32_t *)(addr)))
 
 #define csr_swap(csr, val) \
